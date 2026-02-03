@@ -1,0 +1,57 @@
+"Blog post model representing individual blog entries."
+type Blog {
+    "Unique slug for the blog post."
+    slug: String!
+
+    "Title of the blog post."
+    title: String!
+
+    "Content of the blog post."
+    json_content: JSON!
+
+    "Author of the blog post."
+    author: String!
+
+    "Indicator for published status."
+    is_published: Boolean!
+
+    "Created by who."
+    created_by: User!
+
+    "Updated by who."
+    updated_by: User!
+
+    "When the blog post was created."
+    created_at: DateTime!
+
+    "When the blog post was last updated."
+    updated_at: DateTime!
+
+    tags: [Tag!]! @morphToMany(relation: "tags")
+}
+
+"Blog post model representing individual blog entries for public consumption."
+type BlogPublic @model(class: "App\\Models\\Blog") {
+    "Unique slug for the blog post."
+    slug: String!
+
+    "Title of the blog post."
+    title: String!
+
+    "Content of the blog post."
+    json_content: JSON!
+
+    "Author of the blog post."
+    author: String!
+
+    "Indicator for published status."
+    is_published: Boolean!
+
+    "When the blog post was created."
+    created_at: DateTime!
+
+    "When the blog post was last updated."
+    updated_at: DateTime!
+
+    tags: [Tag!]! @morphToMany(relation: "tags")
+}

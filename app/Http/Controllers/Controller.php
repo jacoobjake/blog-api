@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 
 abstract class Controller
@@ -18,5 +19,10 @@ abstract class Controller
         }
 
         return response()->json($response_data, $status);
+    }
+
+    protected function modelActionMessage(Model $model, string $action): string
+    {
+        return __('messages.model_' . $action, ['model' => __("models." . $model::class)]);
     }
 }

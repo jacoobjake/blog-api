@@ -1,0 +1,25 @@
+extend type Query {
+    "Find a single blog post by an identifying attribute."
+    blog("Search by unique slug." slug: String! @eq): Blog @find @guard
+
+    "List multiple blog posts."
+    blogs(
+        "Filters by author, title, and tags."
+        author: String @where(operator: "like")
+        title: String @where(operator: "like")
+        hasTags: [String!] @scope
+    ): [Blog!]! @paginate(defaultCount: 10) @guard
+
+    "Find a single public blog post by an identifying attribute."
+    blogPublic("Search by unique slug." slug: String! @eq): BlogPublic
+        @scope(name: "public")
+        @find
+
+    "List multiple public blog posts."
+    blogsPublic(
+        "Filters by author, title, and tags."
+        author: String @where(operator: "like")
+        title: String @where(operator: "like")
+        hasTags: [String!] @scope
+    ): [BlogPublic!]! @scope(name: "public") @paginate(defaultCount: 10)
+}

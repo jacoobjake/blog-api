@@ -1,0 +1,5 @@
+<?php
+
+return [
+    'model_not_found' => ':model not found',
+];

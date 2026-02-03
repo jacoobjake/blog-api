@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\Hash;
 class AuthService
 {
     public function __construct(protected UserService $userService) {}
+
     public function token(string $email, string $password): string
     {
-        $user = $this->userService->findByEmailOrFail($email);
+        $user = $this->userService->setByEmail($email)->getModel();
 
         if (!Hash::check($password, $user->password)) {
             throw new AuthenticationException(__('auth.failed'));
