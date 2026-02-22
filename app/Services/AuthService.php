@@ -2,20 +2,39 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
     public function __construct(protected UserService $userService) {}
 
+    /**
+     * Verify user password
+     * @param string $password
+     * @param string $hashedPassword
+     * @param bool $throws
+     * @throws AuthenticationException
+     * @return bool
+     */
+    public function verifyPassword(string $password, string $hashedPassword, bool $throws = true): bool
+    {
+        if (!Hash::check($password, $hashedPassword)) {
+            if ($throws) {
+                throw new AuthenticationException(__('auth.failed'));
+            }
+            return false;
+        }
+        return true;
+    }
+
     public function token(string $email, string $password): string
     {
         $user = $this->userService->setByEmail($email)->getModel();
 
-        if (!Hash::check($password, $user->password)) {
-            throw new AuthenticationException(__('auth.failed'));
-        }
+        $this->verifyPassword($password, $user->password);
 
         return $user->createToken('api-token')->plainTextToken;
     }
@@ -57,5 +76,23 @@ class AuthService
         }
 
         $token->delete();
+    }
+
+    public function session(string $email, string $password): void
+    {
+        if (Auth::attempt(['email' => $email, 'password' => $password])) {
+            logger()->info("success login", ['email' => $email]);
+            logger()->info("user authenticated", request()->user()->toArray());
+            request()->session()->regenerate();
+            return;
+        }
+
+        throw new AuthenticationException(__('auth.failed'));
+    }
+
+    public function invalidateSession()
+    {
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
     }
 }

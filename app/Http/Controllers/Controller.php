@@ -21,6 +21,16 @@ abstract class Controller
         return response()->json($response_data, $status);
     }
 
+    public function error(?string $message = null, int $status = 400): JsonResponse
+    {
+        $response_data = [
+            'success' => false,
+            'message' => $message ?? __('error'),
+        ];
+
+        return response()->json($response_data, $status);
+    }
+
     protected function modelActionMessage(Model $model, string $action): string
     {
         return __('messages.model_' . $action, ['model' => __("models." . $model::class)]);
