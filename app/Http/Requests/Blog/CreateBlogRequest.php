@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Blog;
 
+use App\Enums\BlogJsonContentType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateBlogRequest extends FormRequest
 {
@@ -24,6 +26,8 @@ class CreateBlogRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'json_content' => ['required', 'array'],
+            'json_content.type' => ['required', Rule::enum(BlogJsonContentType::class)],
+            'json_content.body' => BlogJsonContentType::getContentValidationRule($this->input('json_content.type') ?? ''),
             'author' => ['required', 'string'],
             'is_published' => ['required', 'boolean'],
             'tags' => ['nullable', 'array'],
