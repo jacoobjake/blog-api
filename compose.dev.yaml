@@ -9,6 +9,7 @@ services:
     ports:
       # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine
       - "80:80"
+    restart: unless-stopped
     environment:
       - NGINX_HOST=localhost
     networks:
@@ -41,6 +42,7 @@ services:
       - ./:/var/www
     networks:
       - my-blog-app
+    restart: unless-stopped
     # depends_on:
     #   postgres:
     #     condition: service_started # Wait for postgres to start
@@ -63,6 +65,7 @@ services:
       - "${VITE_PORT:-5173}:5173"
     tty: true # Enables an interactive terminal
     stdin_open: true # Keeps standard input open for 'docker exec'
+    restart: unless-stopped
     env_file:
       - .env
     volumes:

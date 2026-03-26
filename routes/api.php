@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssetController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use Illuminate\Support\Facades\Route;
@@ -21,4 +22,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('{blog:slug}', 'update')->name('update');
         Route::delete('{blog:slug}', 'destroy')->name('destroy');
     });
+});
+
+Route::prefix('assets')->name('assets.')->middleware('auth:sanctum')->controller(AssetController::class)->group(function () {
+    Route::post('/', 'store')->name('store');
+    Route::delete('{asset:uuid}', 'destroy')->name('destroy');
 });

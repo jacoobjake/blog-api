@@ -1,0 +1,35 @@
+enum AssetType {
+    Image @enum(value: "image")
+}
+
+type AssetMedia {
+    "Original image file name."
+    file_name: String!
+
+    "Original image MIME type."
+    mime_type: String!
+
+    "Original image URL."
+    url: String!
+
+    "100 x 100 thumbnail URL."
+    thumbnail_100: String!
+
+    "200 x 200 thumbnail URL."
+    thumbnail_200: String!
+}
+
+type Asset {
+    "Asset UUID."
+    uuid: String!
+
+    "Asset type (e.g., image, video)."
+    type: AssetType!
+
+    "Asset owner."
+    user: User @belongsTo
+
+    "Media associated with the asset."
+    media: AssetMedia
+        @field(resolver: "App\\GraphQL\\Resolvers\\AssetResolver@media")
+}

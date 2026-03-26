@@ -40,7 +40,7 @@ abstract class BaseService
         return $this;
     }
 
-    public function getModel(): Model
+    public function getModel(): ?Model
     {
         return $this->model;
     }
