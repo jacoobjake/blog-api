@@ -76,7 +76,7 @@ abstract class BaseService
 
     public function setModelById(int|string $modelId): static
     {
-        $this->model = $this->model::findOrFail($modelId);
+        $this->model = static::$modelClass::findOrFail($modelId);
         return $this;
     }
 

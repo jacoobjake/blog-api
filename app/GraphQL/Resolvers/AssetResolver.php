@@ -18,14 +18,8 @@ class AssetResolver
      */
     public function userAssetsBuilder(mixed $_, array $args): Builder
     {
-        $user = auth()->user();
-
-        if (!$user) {
-            throw new \LogicException("User is not authenticated");
-        }
-
         return app(AssetService::class)->getQuery()
-            ->where('user_id', $user->id)
+            ->where('user_id', auth()->id())
             ->when(isset($args['type']), fn($q) => $q->where('type', $args['type']));
     }
 
@@ -35,15 +29,9 @@ class AssetResolver
      */
     public function userAssetByUuid(mixed $_, array $args): Asset
     {
-        $user = auth()->user();
-
-        if (!$user) {
-            throw new \LogicException("User is not authenticated");
-        }
-
         return app(AssetService::class)->getQuery()
             ->where('uuid', $args['uuid'])
-            ->where('user_id', $user->id)
+            ->where('user_id', auth()->id())
             ->firstOrFail();
     }
 

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 
 class AuthService
 {
@@ -83,7 +84,7 @@ class AuthService
         if (Auth::attempt(['email' => $email, 'password' => $password])) {
             logger()->info("success login", ['email' => $email]);
             logger()->info("user authenticated", request()->user()->toArray());
-            request()->session()->regenerate();
+            Session::regenerate();
             return;
         }
 
@@ -92,7 +93,7 @@ class AuthService
 
     public function invalidateSession()
     {
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
+        Session::invalidate();
+        Session::regenerateToken();
     }
 }

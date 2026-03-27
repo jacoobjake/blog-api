@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\Tags\HasTags;
 
 class Blog extends Model
 {
+    use HasFactory;
     use HasSlug;
     use HasTags;
 
@@ -52,7 +54,7 @@ class Blog extends Model
     }
 
     #[Scope]
-    public function public(Builder $builder): void
+    public function published(Builder $builder): void
     {
         $builder->where('is_published', true);
     }
