@@ -20,4 +20,5 @@ return [
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
     'token_created' => 'Token created successfully.',
     'token_revoked' => 'Token revoked successfully.',
+    'password_updated' => 'Password updated successfully.',
 ];

@@ -96,4 +96,11 @@ class AuthService
         Session::invalidate();
         Session::regenerateToken();
     }
+
+    public function updatePassword(User $user, string $currentPassword, string $newPassword): void
+    {
+        $this->verifyPassword($currentPassword, $user->password);
+
+        $user->update(['password' => $newPassword]);
+    }
 }

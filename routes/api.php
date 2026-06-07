@@ -3,6 +3,7 @@
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -15,6 +16,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('revoke', 'revoke')->name('revoke');
             Route::post('invalidate', 'invalidateSession')->name('invalidate-session');
         });
+    });
+
+    Route::prefix('profile')->name('profile.')->middleware('auth:sanctum')->controller(AdminProfileController::class)->group(function () {
+        Route::put('password', 'updatePassword')->name('password.update');
     });
 
     Route::prefix('blogs')->name('blogs.')->middleware('auth:sanctum')->controller(AdminBlogController::class)->group(function () {
