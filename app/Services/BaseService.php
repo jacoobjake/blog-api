@@ -40,7 +40,7 @@ abstract class BaseService
         return $this;
     }
 
-    public function getModel(): Model
+    public function getModel(): ?Model
     {
         return $this->model;
     }
@@ -76,7 +76,7 @@ abstract class BaseService
 
     public function setModelById(int|string $modelId): static
     {
-        $this->model = $this->model::findOrFail($modelId);
+        $this->model = static::$modelClass::findOrFail($modelId);
         return $this;
     }
 

@@ -1,0 +1,13 @@
+extend type Query {
+    asset("Get by asset UUID" uuid: String!): Asset
+        @guard
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\AssetResolver@userAssetByUuid"
+        )
+    assets("Filter by asset type." type: AssetType): [Asset!]!
+        @guard
+        @paginate(
+            defaultCount: 20
+            builder: "App\\GraphQL\\Resolvers\\AssetResolver@userAssetsBuilder"
+        )
+}

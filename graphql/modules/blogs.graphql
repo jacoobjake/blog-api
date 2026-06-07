@@ -12,8 +12,7 @@ extend type Query {
 
     "Find a single public blog post by an identifying attribute."
     blogPublic("Search by unique slug." slug: String! @eq): BlogPublic
-        @scope(name: "public")
-        @find
+        @find(model: "Blog", scopes: ["published"])
 
     "List multiple public blog posts."
     blogsPublic(
@@ -21,5 +20,9 @@ extend type Query {
         author: String @where(operator: "like")
         title: String @where(operator: "like")
         hasTags: [String!] @scope
-    ): [BlogPublic!]! @scope(name: "public") @paginate(defaultCount: 10)
+    ): [BlogPublic!]!
+        @paginate(
+            defaultCount: 10
+            builder: "App\\GraphQL\\Resolvers\\BlogResolver@publishedBuilder"
+        )
 }
