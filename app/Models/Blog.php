@@ -20,7 +20,9 @@ class Blog extends Model
 
     protected $fillable = [
         'title',
+        'description',
         'json_content',
+        'hero_asset_uuid',
         'author',
         'is_published',
         'created_by',
@@ -51,6 +53,11 @@ class Blog extends Model
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function heroAsset(): BelongsTo
+    {
+        return $this->belongsTo(Asset::class, 'hero_asset_uuid', 'uuid');
     }
 
     #[Scope]

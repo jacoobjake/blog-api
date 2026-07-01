@@ -6,8 +6,14 @@ type Blog {
     "Title of the blog post."
     title: String!
 
+    "Short description or summary of the blog post."
+    description: String
+
     "Content of the blog post."
     json_content: JSON!
+
+    "Hero banner image asset."
+    hero_asset: Asset @belongsTo(relation: "heroAsset")
 
     "Author of the blog post."
     author: String!
@@ -38,8 +44,14 @@ type BlogPublic @model(class: "App\\Models\\Blog") {
     "Title of the blog post."
     title: String!
 
+    "Short description or summary of the blog post."
+    description: String
+
     "Content of the blog post."
     json_content: JSON!
+
+    "Hero banner image asset."
+    hero_asset: Asset @belongsTo(relation: "heroAsset")
 
     "Author of the blog post."
     author: String!

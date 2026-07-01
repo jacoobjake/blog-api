@@ -68,6 +68,25 @@ services:
       timeout: 5s
       retries: 3
 
+  queue-worker:
+    build:
+      context: .
+      dockerfile: ./docker/common/php-fpm/Dockerfile
+      target: production
+    command: php artisan queue:work --verbose --tries=3 --timeout=90
+    restart: unless-stopped
+    volumes:
+      - blog-storage-production:/var/www/storage
+    env_file:
+      - .env
+    networks:
+      - my-blog-production
+    depends_on:
+      php-fpm:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 networks:
   # Attach the service to the 'laravel' network.
   # -----------------------------------------------------------
