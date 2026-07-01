@@ -25,9 +25,15 @@ class CreateBlogRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
             'json_content' => ['required', 'array'],
             'json_content.type' => ['required', Rule::enum(BlogJsonContentType::class)],
             'json_content.body' => BlogJsonContentType::getContentValidationRule($this->input('json_content.type') ?? ''),
+            'hero_asset_uuid' => [
+                'nullable',
+                'uuid',
+                Rule::exists('assets', 'uuid')->where('user_id', auth()->id()),
+            ],
             'author' => ['required', 'string'],
             'is_published' => ['required', 'boolean'],
             'tags' => ['nullable', 'array'],
