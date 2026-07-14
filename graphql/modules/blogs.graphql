@@ -9,6 +9,7 @@ extend type Query {
         title: String @where(operator: "like")
         hasTags: [String!] @scope
         is_published: Boolean @eq
+        trashed: Trashed @trashed
         orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title", "author"])
     ): [Blog!]! @paginate(defaultCount: 10) @guard
 

@@ -29,12 +29,12 @@ class DeleteBlogTest extends TestCase
             ->assertOk();
     }
 
-    public function test_blog_is_removed_from_database_after_delete(): void
+    public function test_blog_is_soft_deleted_after_delete(): void
     {
         $this->actingAs($this->user, 'sanctum')
             ->deleteJson("/api/admin/blogs/{$this->blog->slug}");
 
-        $this->assertDatabaseMissing('blogs', ['id' => $this->blog->id]);
+        $this->assertSoftDeleted('blogs', ['id' => $this->blog->id]);
     }
 
     public function test_unauthenticated_request_returns_401(): void

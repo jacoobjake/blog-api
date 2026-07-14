@@ -33,6 +33,9 @@ type Blog {
     "When the blog post was last updated."
     updated_at: DateTime!
 
+    "When the blog post was soft deleted."
+    deleted_at: DateTime
+
     tags: [Tag!]! @morphToMany(relation: "tags")
 }
 

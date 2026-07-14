@@ -31,4 +31,15 @@ class BlogService extends BaseService
 
         return $this;
     }
+
+    public function restore(): static
+    {
+        if (!$this->model) {
+            throw new \LogicException("Model is not initialized");
+        }
+
+        $this->model->restore();
+
+        return $this;
+    }
 }
