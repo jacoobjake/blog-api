@@ -56,17 +56,4 @@ class BlogController extends Controller
 
         return $this->success($this->modelActionMessage($blog, 'deleted'));
     }
-
-    public function restore(string $slug)
-    {
-        $blog = Blog::onlyTrashed()->where('slug', $slug)->firstOrFail();
-
-        DB::transaction(function () use ($blog) {
-            $this->blogService->setModel($blog)->restore();
-        });
-
-        return $this->success($this->modelActionMessage($blog, 'restored'), [
-            'slug' => $blog->slug,
-        ]);
-    }
 }

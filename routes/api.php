@@ -24,7 +24,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('blogs')->name('blogs.')->middleware('auth:sanctum')->controller(AdminBlogController::class)->group(function () {
         Route::post('/', 'store')->name('store');
-        Route::post('{slug}/restore', 'restore')->name('restore');
         Route::put('{blog:slug}', 'update')->name('update');
         Route::delete('{blog:slug}', 'destroy')->name('destroy');
     });
