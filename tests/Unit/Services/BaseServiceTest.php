@@ -68,12 +68,12 @@ class BaseServiceTest extends TestCase
     // delete()
     // -------------------------------------------------------------------------
 
-    public function test_delete_removes_model_from_database(): void
+    public function test_delete_soft_deletes_model(): void
     {
         $blog = Blog::factory()->create();
         $this->service->setModel($blog)->delete();
 
-        $this->assertDatabaseMissing('blogs', ['id' => $blog->id]);
+        $this->assertSoftDeleted('blogs', ['id' => $blog->id]);
     }
 
     public function test_delete_sets_model_to_null(): void

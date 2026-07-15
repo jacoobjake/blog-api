@@ -1,0 +1,10 @@
+extend type Query {
+    "List all blog tags (admin)."
+    blogTags: [Tag!]!
+        @field(resolver: "App\\GraphQL\\Resolvers\\TagResolver@blogTags")
+        @guard
+
+    "List tags used by published blogs (public)."
+    blogTagsPublic: [Tag!]!
+        @field(resolver: "App\\GraphQL\\Resolvers\\TagResolver@publicBlogTags")
+}
