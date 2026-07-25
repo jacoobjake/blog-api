@@ -17,4 +17,7 @@ type User {
 
     "When the account was last updated."
     updated_at: DateTime!
+
+    "Assigned roles."
+    roles: [String!]! @method(name: "getRoleNames")
 }

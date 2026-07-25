@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 
 abstract class Controller
 {
+    use AuthorizesRequests;
     public function success(?string $message = null, mixed $data = null, int $status = 200): JsonResponse
     {
         $response_data = [

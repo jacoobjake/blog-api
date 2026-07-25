@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Role;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -27,11 +27,14 @@ class UserSeeder extends Seeder
         $existingUser = User::firstWhere('email', $superadmin_data['email']);
 
         if (!$existingUser) {
-            User::create([
+            $user = User::create([
                 'name' => 'Super Admin',
                 'email' => 'superadmin@example.com',
                 'password' => Hash::make('Password@1234'),
             ]);
+            $user->assignRole(Role::ADMIN->value);
+        } elseif (! $existingUser->hasRole(Role::ADMIN->value)) {
+            $existingUser->assignRole(Role::ADMIN->value);
         }
     }
 }

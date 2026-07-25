@@ -50,6 +50,8 @@ class BlogController extends Controller
 
     public function destroy(Blog $blog)
     {
+        $this->authorize('delete', $blog);
+
         DB::transaction(function () use ($blog) {
             $this->blogService->setModel($blog)->delete();
         });

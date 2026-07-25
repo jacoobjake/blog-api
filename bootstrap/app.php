@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -36,5 +37,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 'success' => false,
                 'message' => __('errors.model_not_found', ['model' => __("models." . $exception->getModel())]),
             ], 404);
+        });
+
+        $exceptions->render(function (AuthorizationException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage() ?: __('auth.unauthorized'),
+            ], 403);
         });
     })->create();

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Blog;
 
 use App\Enums\BlogJsonContentType;
+use App\Models\Blog;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -13,7 +14,7 @@ class CreateBlogRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', Blog::class);
     }
 
     /**

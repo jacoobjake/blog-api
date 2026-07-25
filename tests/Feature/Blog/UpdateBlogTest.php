@@ -45,14 +45,23 @@ class UpdateBlogTest extends TestCase
             ->assertJsonStructure(['data' => ['slug']]);
     }
 
-    public function test_updated_by_is_changed_to_auth_user(): void
+    public function test_editor_can_update_another_users_blog(): void
     {
-        $updater = User::factory()->create();
+        $editor = User::factory()->editor()->create();
 
-        $this->actingAs($updater, 'sanctum')
+        $this->actingAs($editor, 'sanctum')
             ->putJson("/api/admin/blogs/{$this->blog->slug}", $this->validPayload());
 
-        $this->assertSame($updater->id, $this->blog->fresh()->updated_by);
+        $this->assertSame($editor->id, $this->blog->fresh()->updated_by);
+    }
+
+    public function test_author_cannot_update_another_users_blog(): void
+    {
+        $otherAuthor = User::factory()->author()->create();
+
+        $this->actingAs($otherAuthor, 'sanctum')
+            ->putJson("/api/admin/blogs/{$this->blog->slug}", $this->validPayload())
+            ->assertForbidden();
     }
 
     public function test_created_by_is_not_changed_on_update(): void

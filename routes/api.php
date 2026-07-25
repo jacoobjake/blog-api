@@ -11,6 +11,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('auth')->name('auth.')->controller(AdminAuthController::class)->group(function () {
         Route::post('token', 'token')->middleware("guest")->name('token');
         Route::post('session', 'session')->middleware("guest")->name('session');
+        Route::post('forgot-password', 'forgotPassword')->middleware('guest')->name('forgot-password');
+        Route::post('reset-password', 'resetPassword')->middleware('guest')->name('reset-password');
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('revoke', 'revoke')->name('revoke');

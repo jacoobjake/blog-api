@@ -1,6 +1,8 @@
 extend type Query {
     "Find a single blog post by an identifying attribute."
-    blog("Search by unique slug." slug: String! @eq): Blog @find @guard
+    blog("Search by unique slug." slug: String!): Blog
+        @guard
+        @field(resolver: "App\\GraphQL\\Resolvers\\BlogResolver@findBlog")
 
     "List multiple blog posts."
     blogs(
@@ -10,7 +12,9 @@ extend type Query {
         hasTags: [String!] @scope
         is_published: Boolean @eq
         orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title", "author"])
-    ): [Blog!]! @paginate(defaultCount: 10) @guard
+    ): [Blog!]!
+        @paginate(defaultCount: 10, builder: "App\\GraphQL\\Resolvers\\BlogResolver@adminBuilder")
+        @guard
 
     "Find a single public blog post by an identifying attribute."
     blogPublic("Search by unique slug." slug: String! @eq): BlogPublic

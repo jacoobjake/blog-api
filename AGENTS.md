@@ -13,3 +13,8 @@ Laravel 12 backend. GraphQL for reads (Lighthouse, endpoint `POST /graphql`; pub
 ### Run / test
 - Full dev stack: `composer dev` (concurrently runs `artisan serve` + queue listener + pail + vite). API-only is enough for the frontend: `php artisan serve --host=0.0.0.0 --port=8000`.
 - Tests: `composer test` (PHPUnit) — full suite passes.
+
+### RBAC (Tier B Phase 1)
+- Roles via **Spatie Permission**: `admin`, `editor`, `author`. Seeded users: `superadmin@example.com` (admin), `test@example.com` (author).
+- Run `php artisan db:seed --class=RolePermissionSeeder` on existing DBs after pulling.
+- Password reset requires `FRONTEND_URL` in `.env` (reset link target) and SMTP/Mailtrap mail config.
