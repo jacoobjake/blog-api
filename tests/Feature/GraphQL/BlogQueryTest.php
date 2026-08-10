@@ -40,6 +40,29 @@ class BlogQueryTest extends TestCase
             ->assertJsonPath('data.blog.title', 'Hello World');
     }
 
+    public function test_blogs_list_returns_null_created_by_when_user_is_missing(): void
+    {
+        $editor = User::factory()->editor()->create();
+        $blog = Blog::factory()->createdBy($this->user)->create(['title' => 'Orphan Owner']);
+        $blog->forceFill(['created_by' => 999_999, 'updated_by' => 999_999])->save();
+
+        $this->actingAs($editor, 'sanctum')
+            ->graphQL(/** @lang GraphQL */ '
+                query {
+                    blogs(first: 10) {
+                        data {
+                            slug
+                            created_by { id }
+                            updated_by { id }
+                        }
+                    }
+                }
+            ')
+            ->assertJsonPath('data.blogs.data.0.slug', $blog->slug)
+            ->assertJsonPath('data.blogs.data.0.created_by', null)
+            ->assertJsonPath('data.blogs.data.0.updated_by', null);
+    }
+
     public function test_unauthenticated_blog_query_returns_error(): void
     {
         $blog = Blog::factory()->create();

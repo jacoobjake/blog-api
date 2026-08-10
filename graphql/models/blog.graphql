@@ -22,10 +22,10 @@ type Blog {
     is_published: Boolean!
 
     "Created by who."
-    created_by: User!
+    created_by: User
 
     "Updated by who."
-    updated_by: User!
+    updated_by: User
 
     "When the blog post was created."
     created_at: DateTime!
