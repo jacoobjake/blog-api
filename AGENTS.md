@@ -15,6 +15,6 @@ Laravel 12 backend. GraphQL for reads (Lighthouse, endpoint `POST /graphql`; pub
 - Tests: `composer test` (PHPUnit) — full suite passes.
 
 ### RBAC (Tier B Phase 1)
-- Roles via **Spatie Permission**: `admin`, `editor`, `author`. Seeded users: `superadmin@example.com` (admin), `test@example.com` (author).
+- Roles via **Spatie Permission**: `superadmin`, `admin`, `editor`, `author`. Seeded users: `superadmin@example.com` (superadmin), `test@example.com` (author).
 - Run `php artisan db:seed --class=RolePermissionSeeder` on existing DBs after pulling.
 - Password reset requires `FRONTEND_URL` in `.env` (reset link target) and SMTP/Mailtrap mail config.

@@ -41,7 +41,10 @@ class CreateBlogWithHeroAssetTest extends TestCase
                     'body' => base64_encode('hello world'),
                 ],
                 'hero_asset_uuid' => $uuid,
-                'author' => 'Jake',
+                'author_profile' => [
+                    'name' => 'Jake',
+                    'bio' => null,
+                ],
                 'is_published' => true,
                 'tags' => ['hero'],
             ]);
@@ -66,7 +69,10 @@ class CreateBlogWithHeroAssetTest extends TestCase
                     'body' => base64_encode('hello world'),
                 ],
                 'hero_asset_uuid' => $asset->uuid,
-                'author' => 'Jake',
+                'author_profile' => [
+                    'name' => 'Jake',
+                    'bio' => null,
+                ],
                 'is_published' => false,
             ])
             ->assertUnprocessable()

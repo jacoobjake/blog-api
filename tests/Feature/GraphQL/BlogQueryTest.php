@@ -117,21 +117,24 @@ class BlogQueryTest extends TestCase
 
     public function test_blogs_filter_by_author(): void
     {
-        Blog::factory()->createdBy($this->user)->create(['author' => 'Jake']);
-        Blog::factory()->createdBy($this->user)->create(['author' => 'Alice']);
+        $jake = \App\Models\AuthorProfile::factory()->create(['name' => 'Jake']);
+        $alice = \App\Models\AuthorProfile::factory()->create(['name' => 'Alice']);
+
+        Blog::factory()->createdBy($this->user)->forAuthorProfile($jake)->create();
+        Blog::factory()->createdBy($this->user)->forAuthorProfile($alice)->create();
 
         $response = $this->actingAs($this->user, 'sanctum')
             ->graphQL(/** @lang GraphQL */ '
                              query ($author: String) {
                                  blogs(first: 10, author: $author) {
-                                     data { author }
+                                     data { author_profile { name } }
                                  }
                              }
                          ', ['author' => '%Jake%']);
 
         $data = $response->json('data.blogs.data');
         $this->assertCount(1, $data);
-        $this->assertSame('Jake', $data[0]['author']);
+        $this->assertSame('Jake', $data[0]['author_profile']['name']);
     }
 
     public function test_blogs_filter_by_tags(): void

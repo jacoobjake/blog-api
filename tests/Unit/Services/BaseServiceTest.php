@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\Models\AuthorProfile;
 use App\Models\Blog;
 use App\Models\User;
 use App\Services\BaseService;
@@ -31,10 +32,11 @@ class BaseServiceTest extends TestCase
     public function test_store_persists_model_and_returns_static(): void
     {
         $user = User::factory()->create();
+        $authorProfile = AuthorProfile::factory()->create();
         $result = $this->service->store([
             'title' => 'Test Blog',
             'json_content' => ['type' => 'compressed_base64', 'body' => 'abc'],
-            'author' => 'Author',
+            'author_profile_id' => $authorProfile->id,
             'is_published' => false,
             'created_by' => $user->id,
             'updated_by' => $user->id,

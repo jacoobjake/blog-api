@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Enums\Role;
 use App\Models\Blog;
+use App\Models\User;
 use App\Policies\BlogPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -20,5 +22,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Blog::class, BlogPolicy::class);
+
+        Gate::before(function (User $user, string $ability) {
+            return $user->hasRole(Role::SUPERADMIN->value) ? true : null;
+        });
     }
 }

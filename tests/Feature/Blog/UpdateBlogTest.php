@@ -26,7 +26,10 @@ class UpdateBlogTest extends TestCase
                 'type' => 'compressed_base64',
                 'body' => base64_encode('updated content'),
             ],
-            'author' => 'Jake',
+            'author_profile' => [
+                'name' => 'Jake',
+                'bio' => null,
+            ],
             'is_published' => true,
             'tags' => ['updated-tag'],
         ], $overrides);

@@ -1,0 +1,11 @@
+"Author profile for blog attribution."
+type AuthorProfile {
+    "Unique primary key."
+    id: ID!
+
+    "Display name."
+    name: String!
+
+    "Short biography."
+    bio: String
+}

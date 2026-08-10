@@ -19,6 +19,9 @@ class RolePermissionSeeder extends Seeder
             PermissionModel::findOrCreate($permission->value);
         }
 
+        $superadmin = RoleModel::findOrCreate(Role::SUPERADMIN->value);
+        $superadmin->syncPermissions(collect(Permission::cases())->map->value);
+
         $admin = RoleModel::findOrCreate(Role::ADMIN->value);
         $admin->syncPermissions(collect(Permission::cases())->map->value);
 

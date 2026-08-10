@@ -49,6 +49,13 @@ class UserFactory extends Factory
         });
     }
 
+    public function superadmin(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $user->syncRoles(Role::SUPERADMIN->value);
+        });
+    }
+
     public function editor(): static
     {
         return $this->afterCreating(function ($user) {

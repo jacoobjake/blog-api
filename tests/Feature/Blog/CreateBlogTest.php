@@ -24,7 +24,10 @@ class CreateBlogTest extends TestCase
                 'type' => 'compressed_base64',
                 'body' => base64_encode('hello world'),
             ],
-            'author' => 'Jake',
+            'author_profile' => [
+                'name' => 'Jake',
+                'bio' => null,
+            ],
             'is_published' => false,
             'tags' => ['laravel', 'php'],
         ], $overrides);

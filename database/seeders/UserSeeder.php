@@ -32,9 +32,9 @@ class UserSeeder extends Seeder
                 'email' => 'superadmin@example.com',
                 'password' => Hash::make('Password@1234'),
             ]);
-            $user->assignRole(Role::ADMIN->value);
-        } elseif (! $existingUser->hasRole(Role::ADMIN->value)) {
-            $existingUser->assignRole(Role::ADMIN->value);
+            $user->assignRole(Role::SUPERADMIN->value);
+        } elseif (! $existingUser->hasRole(Role::SUPERADMIN->value)) {
+            $existingUser->syncRoles(Role::SUPERADMIN->value);
         }
     }
 }

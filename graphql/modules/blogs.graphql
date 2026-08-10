@@ -6,12 +6,12 @@ extend type Query {
 
     "List multiple blog posts."
     blogs(
-        "Filters by author, title, tags, and publish state."
-        author: String @where(operator: "like")
+        "Filters by author name, title, tags, and publish state."
+        author: String @scope(name: "authorName")
         title: String @where(operator: "like")
         hasTags: [String!] @scope
         is_published: Boolean @eq
-        orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title", "author"])
+        orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title"])
     ): [Blog!]!
         @paginate(defaultCount: 10, builder: "App\\GraphQL\\Resolvers\\BlogResolver@adminBuilder")
         @guard
@@ -22,11 +22,11 @@ extend type Query {
 
     "List multiple public blog posts."
     blogsPublic(
-        "Filters by author, title, and tags."
-        author: String @where(operator: "like")
+        "Filters by author name, title, and tags."
+        author: String @scope(name: "authorName")
         title: String @where(operator: "like")
         hasTags: [String!] @scope
-        orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title", "author"])
+        orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title"])
     ): [BlogPublic!]!
         @paginate(
             defaultCount: 10
