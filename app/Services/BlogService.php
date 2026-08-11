@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\TagType;
-use App\Models\AuthorProfile;
 use App\Models\Blog;
 
 class BlogService extends BaseService
@@ -29,23 +28,6 @@ class BlogService extends BaseService
     public function syncTags(array $tags = []): static
     {
         $this->model->syncTagsWithType($tags, TagType::BLOG->value);
-
-        return $this;
-    }
-
-    public function syncAuthorProfile(array $data): static
-    {
-        $profileData = [
-            'name' => $data['name'],
-            'bio' => $data['bio'] ?? null,
-        ];
-
-        if ($this->model->authorProfile) {
-            $this->model->authorProfile->update($profileData);
-        } else {
-            $profile = AuthorProfile::create($profileData);
-            $this->model->update(['author_profile_id' => $profile->id]);
-        }
 
         return $this;
     }

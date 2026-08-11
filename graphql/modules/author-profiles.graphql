@@ -1,0 +1,13 @@
+extend type Query {
+    "List author profiles available to the current user."
+    authorProfiles(
+        "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
+        name: String @where(operator: "like")
+        orderBy: _ @orderBy(columns: ["name", "created_at"])
+    ): [AuthorProfile!]!
+        @paginate(
+            defaultCount: 50
+            builder: "App\\GraphQL\\Resolvers\\AuthorProfileResolver@builder"
+        )
+        @guard
+}

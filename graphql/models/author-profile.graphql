@@ -3,6 +3,9 @@ type AuthorProfile {
     "Unique primary key."
     id: ID!
 
+    "Linked user account, if any."
+    user: User @belongsTo(relation: "user")
+
     "Display name."
     name: String!
 

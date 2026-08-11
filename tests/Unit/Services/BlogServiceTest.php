@@ -119,33 +119,6 @@ class BlogServiceTest extends TestCase
         $this->assertEmpty($tagNames);
     }
 
-    public function test_sync_author_profile_creates_profile_when_missing(): void
-    {
-        $blog = Blog::factory()->createdBy($this->user)->create();
-        $blog->update(['author_profile_id' => null]);
-
-        $this->service->setModel($blog->fresh())->syncAuthorProfile([
-            'name' => 'New Author',
-            'bio' => 'Bio text',
-        ]);
-
-        $blog->refresh();
-        $this->assertSame('New Author', $blog->authorProfile->name);
-        $this->assertSame('Bio text', $blog->authorProfile->bio);
-    }
-
-    public function test_sync_author_profile_updates_existing_profile(): void
-    {
-        $blog = Blog::factory()->createdBy($this->user)->create();
-
-        $this->service->setModel($blog)->syncAuthorProfile([
-            'name' => 'Updated Author',
-            'bio' => 'Updated bio',
-        ]);
-
-        $this->assertSame('Updated Author', $blog->fresh()->authorProfile->name);
-    }
-
     // -------------------------------------------------------------------------
     // Blog model relationships
     // -------------------------------------------------------------------------

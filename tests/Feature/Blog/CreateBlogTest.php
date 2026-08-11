@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Blog;
 
+use App\Models\AuthorProfile;
 use App\Models\Blog;
 use App\Models\User;
 use Tests\TestCase;
@@ -9,11 +10,13 @@ use Tests\TestCase;
 class CreateBlogTest extends TestCase
 {
     private User $user;
+    private AuthorProfile $authorProfile;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->user = User::factory()->create();
+        $this->authorProfile = AuthorProfile::factory()->forUser($this->user)->create();
     }
 
     private function validPayload(array $overrides = []): array
@@ -24,10 +27,7 @@ class CreateBlogTest extends TestCase
                 'type' => 'compressed_base64',
                 'body' => base64_encode('hello world'),
             ],
-            'author_profile' => [
-                'name' => 'Jake',
-                'bio' => null,
-            ],
+            'author_profile_id' => $this->authorProfile->id,
             'is_published' => false,
             'tags' => ['laravel', 'php'],
         ], $overrides);

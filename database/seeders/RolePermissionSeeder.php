@@ -31,6 +31,7 @@ class RolePermissionSeeder extends Seeder
             Permission::BLOGS_VIEW_ANY->value,
             Permission::BLOGS_UPDATE_ANY->value,
             Permission::BLOGS_DELETE_ANY->value,
+            Permission::AUTHORS_VIEW_ANY->value,
         ]);
 
         $author = RoleModel::findOrCreate(Role::AUTHOR->value);
@@ -39,6 +40,8 @@ class RolePermissionSeeder extends Seeder
             Permission::BLOGS_VIEW_OWN->value,
             Permission::BLOGS_UPDATE_OWN->value,
             Permission::BLOGS_DELETE_OWN->value,
+            Permission::AUTHORS_VIEW_OWN->value,
+            Permission::AUTHORS_UPDATE_OWN->value,
         ]);
     }
 }

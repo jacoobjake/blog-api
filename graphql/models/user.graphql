@@ -20,4 +20,7 @@ type User {
 
     "Assigned roles."
     roles: [String!]! @method(name: "getRoleNames")
+
+    "Linked author profile, if any."
+    author_profile: AuthorProfile @hasOne(relation: "authorProfile")
 }

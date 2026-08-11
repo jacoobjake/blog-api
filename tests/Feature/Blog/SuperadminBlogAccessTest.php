@@ -21,10 +21,7 @@ class SuperadminBlogAccessTest extends TestCase
                     'type' => 'compressed_base64',
                     'body' => base64_encode('updated'),
                 ],
-                'author_profile' => [
-                    'name' => 'Superadmin Author',
-                    'bio' => 'Platform owner',
-                ],
+                'author_profile_id' => $blog->author_profile_id,
                 'is_published' => true,
                 'tags' => [],
             ])
@@ -32,6 +29,5 @@ class SuperadminBlogAccessTest extends TestCase
 
         $blog->refresh();
         $this->assertSame('Updated by superadmin', $blog->title);
-        $this->assertSame('Superadmin Author', $blog->authorProfile->name);
     }
 }

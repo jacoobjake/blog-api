@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Blog;
 
+use App\Models\AuthorProfile;
 use App\Models\Blog;
 use App\Models\User;
 use Tests\TestCase;
@@ -9,13 +10,18 @@ use Tests\TestCase;
 class UpdateBlogTest extends TestCase
 {
     private User $user;
+    private AuthorProfile $authorProfile;
     private Blog $blog;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->user = User::factory()->create();
-        $this->blog = Blog::factory()->createdBy($this->user)->create();
+        $this->authorProfile = AuthorProfile::factory()->forUser($this->user)->create();
+        $this->blog = Blog::factory()
+            ->createdBy($this->user)
+            ->forAuthorProfile($this->authorProfile)
+            ->create();
     }
 
     private function validPayload(array $overrides = []): array
@@ -26,10 +32,7 @@ class UpdateBlogTest extends TestCase
                 'type' => 'compressed_base64',
                 'body' => base64_encode('updated content'),
             ],
-            'author_profile' => [
-                'name' => 'Jake',
-                'bio' => null,
-            ],
+            'author_profile_id' => $this->blog->author_profile_id,
             'is_published' => true,
             'tags' => ['updated-tag'],
         ], $overrides);
