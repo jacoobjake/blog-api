@@ -5,6 +5,7 @@ namespace App\GraphQL\Resolvers;
 use App\Enums\Permission;
 use App\Models\AuthorProfile;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 
 class AuthorProfileResolver
 {
@@ -18,5 +19,16 @@ class AuthorProfileResolver
         }
 
         return $query;
+    }
+
+    public function findAuthorProfile(mixed $_, array $args): AuthorProfile
+    {
+        $profile = AuthorProfile::query()
+            ->with('user')
+            ->findOrFail($args['id']);
+
+        Gate::authorize('view', $profile);
+
+        return $profile;
     }
 }

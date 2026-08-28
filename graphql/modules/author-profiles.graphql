@@ -10,4 +10,9 @@ extend type Query {
             builder: "App\\GraphQL\\Resolvers\\AuthorProfileResolver@builder"
         )
         @guard
+
+    "Find a single author profile by id."
+    authorProfile(id: ID!): AuthorProfile
+        @guard
+        @field(resolver: "App\\GraphQL\\Resolvers\\AuthorProfileResolver@findAuthorProfile")
 }
