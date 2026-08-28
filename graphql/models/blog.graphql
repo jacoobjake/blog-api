@@ -16,7 +16,7 @@ type Blog {
     hero_asset: Asset @belongsTo(relation: "heroAsset")
 
     "Author profile for the blog post."
-    author_profile: AuthorProfile! @belongsTo(relation: "authorProfile")
+    author_profile: AuthorProfile @belongsTo(relation: "authorProfile")
 
     "Indicator for published status."
     is_published: Boolean!
@@ -54,7 +54,7 @@ type BlogPublic @model(class: "App\\Models\\Blog") {
     hero_asset: Asset @belongsTo(relation: "heroAsset")
 
     "Author profile for the blog post."
-    author_profile: AuthorProfile! @belongsTo(relation: "authorProfile")
+    author_profile: AuthorProfile @belongsTo(relation: "authorProfile")
 
     "Indicator for published status."
     is_published: Boolean!
