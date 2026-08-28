@@ -39,7 +39,7 @@ class AuthorProfileService extends BaseService
             $this->model->update($profileData);
         }
 
-        if (array_key_exists('user', $data) && $data['user'] !== null) {
+        if (array_key_exists('user', $data) && $data['user'] !== null && $this->model->user_id === null) {
             $this->linkUser($data['user']);
         }
 

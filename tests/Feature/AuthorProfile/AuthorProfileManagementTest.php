@@ -93,6 +93,33 @@ class AuthorProfileManagementTest extends TestCase
         $this->assertSame($user->id, $profile->fresh()->user_id);
     }
 
+    public function test_superadmin_can_update_linked_profile_without_resending_user_link(): void
+    {
+        $superadmin = User::factory()->superadmin()->create();
+        $user = User::factory()->superadmin()->create();
+        $profile = AuthorProfile::factory()->forUser($user)->create([
+            'name' => 'Super Admin',
+            'bio' => 'Original bio',
+        ]);
+
+        $this->actingAs($superadmin, 'sanctum')
+            ->putJson("/api/admin/authors/{$profile->id}", [
+                'name' => 'Super Admin',
+                'bio' => 'Updated bio',
+                'user' => [
+                    'link' => 'existing',
+                    'user_id' => $user->id,
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.author.bio', 'Updated bio');
+
+        $profile->refresh();
+
+        $this->assertSame('Updated bio', $profile->bio);
+        $this->assertSame($user->id, $profile->user_id);
+    }
+
     public function test_author_can_view_and_update_own_profile(): void
     {
         $author = User::factory()->author()->create();
