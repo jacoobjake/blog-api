@@ -41,7 +41,7 @@ class BackfillMissingBlogAuthorProfilesTest extends TestCase
         ]);
     }
 
-    public function test_backfill_assigns_unknown_author_when_creator_has_no_profile(): void
+    public function test_backfill_leaves_author_blank_when_creator_has_no_profile(): void
     {
         $user = User::factory()->create();
 
@@ -59,15 +59,12 @@ class BackfillMissingBlogAuthorProfilesTest extends TestCase
 
         app(BackfillBlogAuthorProfiles::class)->run();
 
-        $unknownAuthorId = AuthorProfile::query()
-            ->where('name', 'Unknown Author')
-            ->whereNull('user_id')
-            ->value('id');
-
-        $this->assertNotNull($unknownAuthorId);
         $this->assertDatabaseHas('blogs', [
             'id' => $blogId,
-            'author_profile_id' => $unknownAuthorId,
+            'author_profile_id' => null,
+        ]);
+        $this->assertDatabaseMissing('author_profiles', [
+            'name' => 'Unknown Author',
         ]);
     }
 
@@ -124,5 +121,43 @@ class BackfillMissingBlogAuthorProfilesTest extends TestCase
         ', ['slug' => 'unlinked-post'])
             ->assertJsonPath('data.blogPublic.slug', 'unlinked-post')
             ->assertJsonPath('data.blogPublic.author_profile', null);
+    }
+
+    public function test_cleanup_migration_unlinks_shared_unknown_author_profile(): void
+    {
+        $unknownAuthorId = DB::table('author_profiles')->insertGetId([
+            'name' => 'Unknown Author',
+            'bio' => null,
+            'user_id' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $user = User::factory()->create();
+
+        $blogId = DB::table('blogs')->insertGetId([
+            'title' => 'Misassigned Post',
+            'slug' => 'misassigned-post',
+            'json_content' => json_encode(['type' => 'compressed_base64', 'body' => 'dGVzdA==']),
+            'author_profile_id' => $unknownAuthorId,
+            'is_published' => true,
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $migration = require database_path(
+            'migrations/2026_08_12_000002_remove_shared_unknown_author_profile.php',
+        );
+        $migration->up();
+
+        $this->assertDatabaseHas('blogs', [
+            'id' => $blogId,
+            'author_profile_id' => null,
+        ]);
+        $this->assertDatabaseMissing('author_profiles', [
+            'id' => $unknownAuthorId,
+        ]);
     }
 }
