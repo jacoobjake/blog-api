@@ -26,11 +26,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('authors')->name('authors.')->middleware('auth:sanctum')->controller(AdminAuthorProfileController::class)->group(function () {
-        Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
-        Route::get('me', 'me')->name('me');
         Route::put('me', 'updateMe')->name('me.update');
-        Route::get('{authorProfile}', 'show')->name('show');
         Route::put('{authorProfile}', 'update')->name('update');
         Route::delete('{authorProfile}', 'destroy')->name('destroy');
     });

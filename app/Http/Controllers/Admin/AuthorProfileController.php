@@ -8,24 +8,11 @@ use App\Http\Requests\AuthorProfile\UpdateAuthorProfileRequest;
 use App\Http\Requests\AuthorProfile\UpdateOwnAuthorProfileRequest;
 use App\Models\AuthorProfile;
 use App\Services\AuthorProfileService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AuthorProfileController extends Controller
 {
     public function __construct(protected AuthorProfileService $authorProfileService) {}
-
-    public function index(Request $request)
-    {
-        $this->authorize('viewAny', AuthorProfile::class);
-
-        $profiles = AuthorProfile::query()
-            ->with('user:id,name,email')
-            ->orderBy('name')
-            ->get();
-
-        return $this->success(null, ['authors' => $profiles]);
-    }
 
     public function store(CreateAuthorProfileRequest $request)
     {
@@ -38,15 +25,6 @@ class AuthorProfileController extends Controller
 
         return $this->success($this->modelActionMessage($profile, 'created'), [
             'author' => $profile,
-        ]);
-    }
-
-    public function show(AuthorProfile $authorProfile)
-    {
-        $this->authorize('view', $authorProfile);
-
-        return $this->success(null, [
-            'author' => $authorProfile->load('user:id,name,email'),
         ]);
     }
 
@@ -74,21 +52,6 @@ class AuthorProfileController extends Controller
         });
 
         return $this->success($this->modelActionMessage($authorProfile, 'deleted'));
-    }
-
-    public function me(Request $request)
-    {
-        $profile = $request->user()->authorProfile;
-
-        if ($profile === null) {
-            return $this->error(__('errors.author_profile_not_found'), 404);
-        }
-
-        $this->authorize('view', $profile);
-
-        return $this->success(null, [
-            'author' => $profile->load('user:id,name,email'),
-        ]);
     }
 
     public function updateMe(UpdateOwnAuthorProfileRequest $request)

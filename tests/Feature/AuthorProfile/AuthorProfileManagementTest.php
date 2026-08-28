@@ -4,10 +4,12 @@ namespace Tests\Feature\AuthorProfile;
 
 use App\Models\AuthorProfile;
 use App\Models\User;
+use Nuwave\Lighthouse\Testing\MakesGraphQLRequests;
 use Tests\TestCase;
 
 class AuthorProfileManagementTest extends TestCase
 {
+    use MakesGraphQLRequests;
     public function test_superadmin_can_create_profile_without_user(): void
     {
         $superadmin = User::factory()->superadmin()->create();
@@ -170,9 +172,16 @@ class AuthorProfileManagementTest extends TestCase
         ]);
 
         $this->actingAs($author, 'sanctum')
-            ->getJson('/api/admin/authors/me')
-            ->assertOk()
-            ->assertJsonPath('data.author.id', $profile->id);
+            ->graphQL(/** @lang GraphQL */ '
+                query {
+                    me {
+                        author_profile {
+                            id
+                        }
+                    }
+                }
+            ')
+            ->assertJsonPath('data.me.author_profile.id', (string) $profile->id);
 
         $this->actingAs($author, 'sanctum')
             ->putJson('/api/admin/authors/me', [
@@ -191,8 +200,14 @@ class AuthorProfileManagementTest extends TestCase
         $otherProfile = AuthorProfile::factory()->create();
 
         $this->actingAs($author, 'sanctum')
-            ->getJson("/api/admin/authors/{$otherProfile->id}")
-            ->assertForbidden();
+            ->graphQL(/** @lang GraphQL */ '
+                query ($id: ID!) {
+                    authorProfile(id: $id) {
+                        id
+                    }
+                }
+            ', ['id' => (string) $otherProfile->id])
+            ->assertGraphQLErrorMessage('This action is unauthorized.');
     }
 
     public function test_author_cannot_create_profiles(): void
