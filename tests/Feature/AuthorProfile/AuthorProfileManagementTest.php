@@ -120,6 +120,48 @@ class AuthorProfileManagementTest extends TestCase
         $this->assertSame($user->id, $profile->user_id);
     }
 
+    public function test_superadmin_can_relink_profile_to_different_user(): void
+    {
+        $superadmin = User::factory()->superadmin()->create();
+        $currentUser = User::factory()->author()->create();
+        $newUser = User::factory()->author()->create();
+        $profile = AuthorProfile::factory()->forUser($currentUser)->create([
+            'name' => 'Reassignable Author',
+        ]);
+
+        $this->actingAs($superadmin, 'sanctum')
+            ->putJson("/api/admin/authors/{$profile->id}", [
+                'user' => [
+                    'link' => 'existing',
+                    'user_id' => $newUser->id,
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.author.user.id', $newUser->id);
+
+        $this->assertSame($newUser->id, $profile->fresh()->user_id);
+    }
+
+    public function test_superadmin_can_unlink_profile_user(): void
+    {
+        $superadmin = User::factory()->superadmin()->create();
+        $user = User::factory()->author()->create();
+        $profile = AuthorProfile::factory()->forUser($user)->create([
+            'name' => 'Linked Author',
+        ]);
+
+        $this->actingAs($superadmin, 'sanctum')
+            ->putJson("/api/admin/authors/{$profile->id}", [
+                'user' => [
+                    'link' => 'none',
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.author.user', null);
+
+        $this->assertNull($profile->fresh()->user_id);
+    }
+
     public function test_author_can_view_and_update_own_profile(): void
     {
         $author = User::factory()->author()->create();

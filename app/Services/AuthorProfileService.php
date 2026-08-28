@@ -39,7 +39,7 @@ class AuthorProfileService extends BaseService
             $this->model->update($profileData);
         }
 
-        if (array_key_exists('user', $data) && $data['user'] !== null && $this->model->user_id === null) {
+        if (array_key_exists('user', $data) && $data['user'] !== null) {
             $this->linkUser($data['user']);
         }
 
@@ -55,13 +55,11 @@ class AuthorProfileService extends BaseService
         $link = $userData['link'] ?? 'none';
 
         if ($link === 'none') {
-            return $this;
-        }
+            if ($this->model->user_id !== null) {
+                $this->model->update(['user_id' => null]);
+            }
 
-        if ($this->model->user_id !== null) {
-            throw ValidationException::withMessages([
-                'user' => __('validation.author_profile_user_already_linked'),
-            ]);
+            return $this;
         }
 
         if ($link === 'existing') {
@@ -73,7 +71,14 @@ class AuthorProfileService extends BaseService
                 ]);
             }
 
-            if (AuthorProfile::query()->where('user_id', $userId)->exists()) {
+            if ($this->model->user_id === $userId) {
+                return $this;
+            }
+
+            if (AuthorProfile::query()
+                ->where('user_id', $userId)
+                ->whereKeyNot($this->model->id)
+                ->exists()) {
                 throw ValidationException::withMessages([
                     'user.user_id' => __('validation.author_profile_user_already_has_profile'),
                 ]);
