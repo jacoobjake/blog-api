@@ -1,8 +1,9 @@
 extend type Query {
     "Find a single blog post by an identifying attribute."
-    blog("Search by unique slug." slug: String!): Blog
+    blog("Search by unique slug." slug: String! @eq): Blog
         @guard
-        @field(resolver: "App\\GraphQL\\Resolvers\\BlogResolver@findBlog")
+        @find(model: "App\\Models\\Blog")
+        @canResolved(ability: "view")
 
     "List multiple blog posts."
     blogs(
@@ -13,8 +14,9 @@ extend type Query {
         is_published: Boolean @eq
         orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title"])
     ): [Blog!]!
-        @paginate(defaultCount: 10, builder: "App\\GraphQL\\Resolvers\\BlogResolver@adminBuilder")
         @guard
+        @canModel(ability: "viewAny", model: "App\\Models\\Blog")
+        @paginate(defaultCount: 10, builder: "App\\GraphQL\\Resolvers\\BlogResolver@adminBuilder")
 
     "Find a single public blog post by an identifying attribute."
     blogPublic("Search by unique slug." slug: String! @eq): BlogPublic

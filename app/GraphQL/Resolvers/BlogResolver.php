@@ -6,7 +6,6 @@ use App\Enums\Permission;
 use App\Models\Blog;
 use App\Services\BlogService;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Gate;
 
 class BlogResolver
 {
@@ -32,14 +31,5 @@ class BlogResolver
         }
 
         return $query;
-    }
-
-    public function findBlog(mixed $_, array $args): Blog
-    {
-        $blog = Blog::query()->where('slug', $args['slug'])->firstOrFail();
-
-        Gate::authorize('view', $blog);
-
-        return $blog;
     }
 }

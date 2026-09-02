@@ -1,11 +1,12 @@
 extend type Query {
-    asset("Get by asset UUID" uuid: String!): Asset
+    asset("Get by asset UUID" uuid: String! @eq): Asset
         @guard
-        @field(
-            resolver: "App\\GraphQL\\Resolvers\\AssetResolver@userAssetByUuid"
-        )
+        @find(model: "App\\Models\\Asset", scopes: ["ownedByAuthenticatedUser"])
+        @canResolved(ability: "view")
+
     assets("Filter by asset type." type: AssetType): [Asset!]!
         @guard
+        @canModel(ability: "viewAny", model: "App\\Models\\Asset")
         @paginate(
             defaultCount: 20
             builder: "App\\GraphQL\\Resolvers\\AssetResolver@userAssetsBuilder"

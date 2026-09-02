@@ -5,7 +5,14 @@
 ### Service
 Laravel 12 backend. **GraphQL for reads** (Lighthouse, endpoint `POST /graphql`), **REST for writes**, Sanctum for admin auth. Default database is file-based SQLite (`database/database.sqlite`) — no DB server required.
 
-New modules should expose list/detail queries via GraphQL and create/update/delete via REST. Do not add REST `GET` routes.
+### API conventions
+- **Reads:** GraphQL (`POST /graphql`) — blogs, authors, assets, auth (`me`), users, tags
+- **Writes:** REST under `/api/admin/*` and `/api/assets`
+- **No REST `GET` routes** — use GraphQL for all reads
+- **Authorization is declared at the route/schema layer:**
+  - REST: `auth:sanctum` + `can:{ability},{model}` middleware on each route in `routes/api.php`
+  - GraphQL: `@guard` + `@canModel` / `@canResolved` directives in `graphql/modules/*.graphql`
+  - Controllers, form requests, and resolvers should not call `authorize()` or `Gate::authorize()`
 
 ### Runtime gotchas
 - **Requires PHP 8.4**, not 8.2. `composer.json` declares `php: ^8.2`, but `composer.lock` pins Symfony 8 components that need `php >= 8.4`, so `composer install` fails on PHP 8.3. Use PHP 8.4.

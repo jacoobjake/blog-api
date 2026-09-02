@@ -9,9 +9,7 @@ class UpdateOwnAuthorProfileRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $profile = $this->user()->authorProfile;
-
-        return $profile !== null && $this->user()->can('update', $profile);
+        return true;
     }
 
     public function rules(): array

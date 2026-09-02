@@ -45,8 +45,6 @@ class AuthorProfileController extends Controller
 
     public function destroy(AuthorProfile $authorProfile)
     {
-        $this->authorize('delete', $authorProfile);
-
         DB::transaction(function () use ($authorProfile) {
             $this->authorProfileService->setModel($authorProfile)->delete();
         });
