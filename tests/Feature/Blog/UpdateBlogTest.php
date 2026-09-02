@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Blog;
 
+use App\Models\AuthorProfile;
 use App\Models\Blog;
 use App\Models\User;
 use Tests\TestCase;
@@ -9,13 +10,18 @@ use Tests\TestCase;
 class UpdateBlogTest extends TestCase
 {
     private User $user;
+    private AuthorProfile $authorProfile;
     private Blog $blog;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->user = User::factory()->create();
-        $this->blog = Blog::factory()->createdBy($this->user)->create();
+        $this->authorProfile = AuthorProfile::factory()->forUser($this->user)->create();
+        $this->blog = Blog::factory()
+            ->createdBy($this->user)
+            ->forAuthorProfile($this->authorProfile)
+            ->create();
     }
 
     private function validPayload(array $overrides = []): array
@@ -26,7 +32,7 @@ class UpdateBlogTest extends TestCase
                 'type' => 'compressed_base64',
                 'body' => base64_encode('updated content'),
             ],
-            'author' => 'Jake',
+            'author_profile_id' => $this->blog->author_profile_id,
             'is_published' => true,
             'tags' => ['updated-tag'],
         ], $overrides);
@@ -45,14 +51,23 @@ class UpdateBlogTest extends TestCase
             ->assertJsonStructure(['data' => ['slug']]);
     }
 
-    public function test_updated_by_is_changed_to_auth_user(): void
+    public function test_editor_can_update_another_users_blog(): void
     {
-        $updater = User::factory()->create();
+        $editor = User::factory()->editor()->create();
 
-        $this->actingAs($updater, 'sanctum')
+        $this->actingAs($editor, 'sanctum')
             ->putJson("/api/admin/blogs/{$this->blog->slug}", $this->validPayload());
 
-        $this->assertSame($updater->id, $this->blog->fresh()->updated_by);
+        $this->assertSame($editor->id, $this->blog->fresh()->updated_by);
+    }
+
+    public function test_author_cannot_update_another_users_blog(): void
+    {
+        $otherAuthor = User::factory()->author()->create();
+
+        $this->actingAs($otherAuthor, 'sanctum')
+            ->putJson("/api/admin/blogs/{$this->blog->slug}", $this->validPayload())
+            ->assertForbidden();
     }
 
     public function test_created_by_is_not_changed_on_update(): void

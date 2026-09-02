@@ -20,8 +20,9 @@ class BlogController extends Controller
     {
         $blog = DB::transaction(function () use ($request) {
             $validated = $request->validated();
-            $data = Arr::except($validated, 'tags');
+            $data = Arr::except($validated, ['tags']);
             $tags = $validated['tags'] ?? [];
+
             return $this->blogService->store($data)
                 ->syncTags($tags)
                 ->getModel();
@@ -35,8 +36,9 @@ class BlogController extends Controller
     {
         $blog = DB::transaction(function () use ($request, $blog) {
             $validated = $request->validated();
-            $data = Arr::except($validated, 'tags');
+            $data = Arr::except($validated, ['tags']);
             $tags = $validated['tags'] ?? [];
+
             return $this->blogService->setModel($blog)
                 ->update($data)
                 ->syncTags($tags)

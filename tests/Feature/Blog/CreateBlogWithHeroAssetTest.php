@@ -3,6 +3,7 @@
 namespace Tests\Feature\Blog;
 
 use App\Models\Asset;
+use App\Models\AuthorProfile;
 use App\Models\Blog;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -12,12 +13,14 @@ use Tests\TestCase;
 class CreateBlogWithHeroAssetTest extends TestCase
 {
     private User $user;
+    private AuthorProfile $authorProfile;
 
     protected function setUp(): void
     {
         parent::setUp();
         Storage::fake('public');
         $this->user = User::factory()->create();
+        $this->authorProfile = AuthorProfile::factory()->forUser($this->user)->create();
     }
 
     public function test_authenticated_user_can_create_blog_with_hero_asset_and_description(): void
@@ -41,7 +44,7 @@ class CreateBlogWithHeroAssetTest extends TestCase
                     'body' => base64_encode('hello world'),
                 ],
                 'hero_asset_uuid' => $uuid,
-                'author' => 'Jake',
+                'author_profile_id' => $this->authorProfile->id,
                 'is_published' => true,
                 'tags' => ['hero'],
             ]);
@@ -66,7 +69,7 @@ class CreateBlogWithHeroAssetTest extends TestCase
                     'body' => base64_encode('hello world'),
                 ],
                 'hero_asset_uuid' => $asset->uuid,
-                'author' => 'Jake',
+                'author_profile_id' => $this->authorProfile->id,
                 'is_published' => false,
             ])
             ->assertUnprocessable()

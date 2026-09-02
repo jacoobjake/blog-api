@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -30,6 +31,43 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function ($user) {
+            if ($user->roles()->count() === 0) {
+                $user->assignRole(Role::AUTHOR->value);
+            }
+        });
+    }
+
+    public function admin(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $user->syncRoles(Role::ADMIN->value);
+        });
+    }
+
+    public function superadmin(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $user->syncRoles(Role::SUPERADMIN->value);
+        });
+    }
+
+    public function editor(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $user->syncRoles(Role::EDITOR->value);
+        });
+    }
+
+    public function author(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $user->syncRoles(Role::AUTHOR->value);
+        });
     }
 
     /**

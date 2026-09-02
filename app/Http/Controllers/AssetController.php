@@ -29,11 +29,6 @@ class AssetController extends Controller
 
     public function destroy(Asset $asset)
     {
-        // Handle asset deletion
-        if ($asset->user_id !== auth()->id()) {
-            return $this->error(__("auth.unauthorized"), 403);
-        }
-
         $this->assetService->setModel($asset)->delete();
 
         return $this->success($this->modelActionMessage($asset, 'deleted'));

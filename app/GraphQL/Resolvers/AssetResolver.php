@@ -19,20 +19,8 @@ class AssetResolver
     public function userAssetsBuilder(mixed $_, array $args): Builder
     {
         return app(AssetService::class)->getQuery()
-            ->where('user_id', auth()->id())
-            ->when(isset($args['type']), fn($q) => $q->where('type', $args['type']));
-    }
-
-    /**
-     * @param  mixed  $_
-     * @param  array{uuid: string}  $args
-     */
-    public function userAssetByUuid(mixed $_, array $args): Asset
-    {
-        return app(AssetService::class)->getQuery()
-            ->where('uuid', $args['uuid'])
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
+            ->ownedByAuthenticatedUser()
+            ->when(isset($args['type']), fn ($q) => $q->where('type', $args['type']));
     }
 
     /**

@@ -1,16 +1,22 @@
 extend type Query {
     "Find a single blog post by an identifying attribute."
-    blog("Search by unique slug." slug: String! @eq): Blog @find @guard
+    blog("Search by unique slug." slug: String! @eq): Blog
+        @guard
+        @find(model: "App\\Models\\Blog")
+        @canResolved(ability: "view")
 
     "List multiple blog posts."
     blogs(
-        "Filters by author, title, tags, and publish state."
-        author: String @where(operator: "like")
+        "Filters by author name, title, tags, and publish state."
+        author: String @scope(name: "authorName")
         title: String @where(operator: "like")
         hasTags: [String!] @scope
         is_published: Boolean @eq
-        orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title", "author"])
-    ): [Blog!]! @paginate(defaultCount: 10) @guard
+        orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title"])
+    ): [Blog!]!
+        @guard
+        @canModel(ability: "viewAny", model: "App\\Models\\Blog")
+        @paginate(defaultCount: 10, builder: "App\\GraphQL\\Resolvers\\BlogResolver@adminBuilder")
 
     "Find a single public blog post by an identifying attribute."
     blogPublic("Search by unique slug." slug: String! @eq): BlogPublic
@@ -18,11 +24,11 @@ extend type Query {
 
     "List multiple public blog posts."
     blogsPublic(
-        "Filters by author, title, and tags."
-        author: String @where(operator: "like")
+        "Filters by author name, title, and tags."
+        author: String @scope(name: "authorName")
         title: String @where(operator: "like")
         hasTags: [String!] @scope
-        orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title", "author"])
+        orderBy: _ @orderBy(columns: ["created_at", "updated_at", "title"])
     ): [BlogPublic!]!
         @paginate(
             defaultCount: 10

@@ -25,7 +25,7 @@ class Blog extends Model
         'description',
         'json_content',
         'hero_asset_uuid',
-        'author',
+        'author_profile_id',
         'is_published',
         'created_by',
         'updated_by',
@@ -47,6 +47,11 @@ class Blog extends Model
             ->slugsShouldBeNoLongerThan(50);
     }
 
+    public function authorProfile(): BelongsTo
+    {
+        return $this->belongsTo(AuthorProfile::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -60,6 +65,18 @@ class Blog extends Model
     public function heroAsset(): BelongsTo
     {
         return $this->belongsTo(Asset::class, 'hero_asset_uuid', 'uuid');
+    }
+
+    #[Scope]
+    public function authorName(Builder $builder, ?string $name): void
+    {
+        if ($name === null || $name === '') {
+            return;
+        }
+
+        $builder->whereHas('authorProfile', function (Builder $query) use ($name) {
+            $query->where('name', 'like', $name);
+        });
     }
 
     #[Scope]
