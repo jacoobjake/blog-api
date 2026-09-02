@@ -21,9 +21,11 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
         ]);
 
+        $testUser = config('seeding.test_user');
+
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => $testUser['name'],
+            'email' => $testUser['email'],
         ])->assignRole(Role::AUTHOR->value);
     }
 }

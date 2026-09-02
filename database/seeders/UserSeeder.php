@@ -17,20 +17,17 @@ class UserSeeder extends Seeder
         $this->seedSuperAdmin();
     }
 
-    protected function seedSuperAdmin()
+    protected function seedSuperAdmin(): void
     {
-        $superadmin_data = [
-            'name' => 'Super Admin',
-            'email' => 'superadmin@example.com',
-        ];
+        $superadmin = config('seeding.superadmin');
 
-        $existingUser = User::firstWhere('email', $superadmin_data['email']);
+        $existingUser = User::firstWhere('email', $superadmin['email']);
 
-        if (!$existingUser) {
+        if (! $existingUser) {
             $user = User::create([
-                'name' => 'Super Admin',
-                'email' => 'superadmin@example.com',
-                'password' => Hash::make('Password@1234'),
+                'name' => $superadmin['name'],
+                'email' => $superadmin['email'],
+                'password' => Hash::make($superadmin['password']),
             ]);
             $user->assignRole(Role::SUPERADMIN->value);
         } elseif (! $existingUser->hasRole(Role::SUPERADMIN->value)) {
