@@ -1,6 +1,6 @@
 extend type Query {
     "Get current user profile"
     me: User!
-        @guard
+        @policy(check: AUTHENTICATED)
         @field(resolver: "App\\GraphQL\\Resolvers\\AuthResolver@me")
 }

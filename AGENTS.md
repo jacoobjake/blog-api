@@ -11,7 +11,8 @@ Laravel 12 backend. **GraphQL for reads** (Lighthouse, endpoint `POST /graphql`)
 - **No REST `GET` routes** — use GraphQL for all reads
 - **Authorization is declared at the route/schema layer:**
   - REST: `auth:sanctum` + `can:{ability},{model}` middleware on each route in `routes/api.php`
-  - GraphQL: `@guard` + `@canModel` / `@canResolved` directives in `graphql/modules/*.graphql`
+  - GraphQL: `@policy` field middleware in `graphql/modules/*.graphql` (`AUTHENTICATED`, `MODEL_CLASS`, `RESOLVED_VALUE`)
+  - GraphQL list scoping: `App\GraphQL\Builders\ScopedListBuilder` + model `visibleToAuthenticatedUser` scope
   - Controllers, form requests, and resolvers should not call `authorize()` or `Gate::authorize()`
 
 ### Runtime gotchas

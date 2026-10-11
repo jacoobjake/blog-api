@@ -5,16 +5,14 @@ extend type Query {
         name: String @where(operator: "like")
         orderBy: _ @orderBy(columns: ["name", "created_at"])
     ): [AuthorProfile!]!
-        @guard
-        @canModel(ability: "viewAny", model: "App\\Models\\AuthorProfile")
+        @policy(check: MODEL_CLASS, model: "App\\Models\\AuthorProfile", ability: "viewAny")
         @paginate(
             defaultCount: 50
-            builder: "App\\GraphQL\\Resolvers\\AuthorProfileResolver@builder"
+            builder: "App\\GraphQL\\Builders\\ScopedListBuilder@authorProfiles"
         )
 
     "Find a single author profile by id."
     authorProfile(id: ID! @eq): AuthorProfile
-        @guard
+        @policy(check: RESOLVED_VALUE, ability: "view")
         @find(model: "App\\Models\\AuthorProfile")
-        @canResolved(ability: "view")
 }

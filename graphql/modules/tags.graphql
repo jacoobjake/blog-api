@@ -2,7 +2,7 @@ extend type Query {
     "List all blog tags (admin)."
     blogTags: [Tag!]!
         @field(resolver: "App\\GraphQL\\Resolvers\\TagResolver@blogTags")
-        @guard
+        @policy(check: AUTHENTICATED)
 
     "List tags used by published blogs (public)."
     blogTagsPublic: [Tag!]!

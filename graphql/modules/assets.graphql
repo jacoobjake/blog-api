@@ -1,14 +1,12 @@
 extend type Query {
     asset("Get by asset UUID" uuid: String! @eq): Asset
-        @guard
-        @find(model: "App\\Models\\Asset", scopes: ["ownedByAuthenticatedUser"])
-        @canResolved(ability: "view")
+        @policy(check: RESOLVED_VALUE, ability: "view")
+        @find(model: "App\\Models\\Asset")
 
     assets("Filter by asset type." type: AssetType): [Asset!]!
-        @guard
-        @canModel(ability: "viewAny", model: "App\\Models\\Asset")
+        @policy(check: MODEL_CLASS, model: "App\\Models\\Asset", ability: "viewAny")
         @paginate(
             defaultCount: 20
-            builder: "App\\GraphQL\\Resolvers\\AssetResolver@userAssetsBuilder"
+            builder: "App\\GraphQL\\Builders\\ScopedListBuilder@assets"
         )
 }

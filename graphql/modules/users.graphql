@@ -8,11 +8,11 @@ extend type Query {
         email: String
             @eq
             @rules(apply: ["prohibits:id", "required_without:id", "email"])
-    ): User @find @guard
+    ): User @policy(check: AUTHENTICATED) @find
 
     "List multiple users."
     users(
         "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
         name: String @where(operator: "like")
-    ): [User!]! @paginate(defaultCount: 10) @guard
+    ): [User!]! @policy(check: AUTHENTICATED) @paginate(defaultCount: 10)
 }
