@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 use App\Enums\TagType;
+use App\Models\AuthorProfile;
 use App\Models\Blog;
 use App\Models\User;
 use App\Services\BlogService;
@@ -27,10 +28,12 @@ class BlogServiceTest extends TestCase
 
     public function test_store_sets_created_by_and_updated_by_to_auth_user(): void
     {
+        $authorProfile = AuthorProfile::factory()->create();
+
         $this->service->store([
             'title' => 'My Blog',
             'json_content' => ['type' => 'compressed_base64', 'body' => 'abc'],
-            'author' => 'Author',
+            'author_profile_id' => $authorProfile->id,
             'is_published' => false,
         ]);
 
@@ -42,10 +45,12 @@ class BlogServiceTest extends TestCase
 
     public function test_store_persists_the_blog(): void
     {
+        $authorProfile = AuthorProfile::factory()->create();
+
         $this->service->store([
             'title' => 'Persisted Blog',
             'json_content' => ['type' => 'compressed_base64', 'body' => 'abc'],
-            'author' => 'Author',
+            'author_profile_id' => $authorProfile->id,
             'is_published' => false,
         ]);
 

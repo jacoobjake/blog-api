@@ -1,0 +1,18 @@
+extend type Query {
+    "List author profiles available to the current user."
+    authorProfiles(
+        "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
+        name: String @where(operator: "like")
+        orderBy: _ @orderBy(columns: ["name", "created_at"])
+    ): [AuthorProfile!]!
+        @policy(check: MODEL_CLASS, model: "App\\Models\\AuthorProfile", ability: "viewAny")
+        @paginate(
+            defaultCount: 50
+            builder: "App\\GraphQL\\Builders\\ScopedListBuilder@authorProfiles"
+        )
+
+    "Find a single author profile by id."
+    authorProfile(id: ID! @eq): AuthorProfile
+        @policy(check: RESOLVED_VALUE, ability: "view")
+        @find(model: "App\\Models\\AuthorProfile")
+}

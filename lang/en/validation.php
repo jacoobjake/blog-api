@@ -197,4 +197,8 @@ return [
 
     'attributes' => [],
 
+    'author_profile_user_already_linked' => 'This author profile is already linked to a user.',
+    'author_profile_user_already_has_profile' => 'This user already has an author profile.',
+    'author_profile_assignment_forbidden' => 'You can only assign your own author profile.',
+
 ];

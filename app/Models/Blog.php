@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\Permission;
 use App\Enums\TagType;
+use App\GraphQL\Concerns\ScopesVisibilityToAuthenticatedUser;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +20,7 @@ class Blog extends Model
     use HasFactory;
     use HasSlug;
     use HasTags;
+    use ScopesVisibilityToAuthenticatedUser;
     use SoftDeletes;
 
     protected $fillable = [
@@ -25,7 +28,7 @@ class Blog extends Model
         'description',
         'json_content',
         'hero_asset_uuid',
-        'author',
+        'author_profile_id',
         'is_published',
         'created_by',
         'updated_by',
@@ -47,6 +50,11 @@ class Blog extends Model
             ->slugsShouldBeNoLongerThan(50);
     }
 
+    public function authorProfile(): BelongsTo
+    {
+        return $this->belongsTo(AuthorProfile::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -63,6 +71,18 @@ class Blog extends Model
     }
 
     #[Scope]
+    public function authorName(Builder $builder, ?string $name): void
+    {
+        if ($name === null || $name === '') {
+            return;
+        }
+
+        $builder->whereHas('authorProfile', function (Builder $query) use ($name) {
+            $query->where('name', 'like', $name);
+        });
+    }
+
+    #[Scope]
     public function published(Builder $builder): void
     {
         $builder->where('is_published', true);
@@ -72,5 +92,15 @@ class Blog extends Model
     public function hasTags(Builder $builder, array $tags): void
     {
         $builder->withAnyTags($tags, TagType::BLOG->value);
+    }
+
+    protected static function viewAnyPermission(): string
+    {
+        return Permission::BLOGS_VIEW_ANY->value;
+    }
+
+    protected static function restrictToOwnedRecords(Builder $builder, User $user): void
+    {
+        $builder->where('created_by', $user->id);
     }
 }

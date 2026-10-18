@@ -44,20 +44,18 @@ class AssetQueryTest extends TestCase
             ->assertJsonPath('data.asset.type', 'Image');
     }
 
-    public function test_querying_another_users_asset_returns_not_found(): void
+    public function test_querying_another_users_asset_returns_unauthorized(): void
     {
         $otherUser = User::factory()->create();
         $asset = Asset::factory()->image()->forUser($otherUser)->create();
 
-        $response = $this->actingAs($this->user, 'sanctum')
+        $this->actingAs($this->user, 'sanctum')
             ->graphQL(/** @lang GraphQL */ '
                              query ($uuid: String!) {
                                  asset(uuid: $uuid) { uuid }
                              }
-                         ', ['uuid' => $asset->uuid]);
-
-        // The resolver throws ModelNotFoundException which Lighthouse surfaces as an error
-        $this->assertNotEmpty($response->json('errors'));
+                         ', ['uuid' => $asset->uuid])
+            ->assertGraphQLErrorMessage('This action is unauthorized.');
     }
 
     public function test_unauthenticated_asset_query_returns_error(): void

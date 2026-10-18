@@ -49,4 +49,22 @@ class DeleteBlogTest extends TestCase
             ->deleteJson('/api/admin/blogs/non-existent-slug')
             ->assertNotFound();
     }
+
+    public function test_author_cannot_delete_another_users_blog(): void
+    {
+        $otherAuthor = User::factory()->author()->create();
+
+        $this->actingAs($otherAuthor, 'sanctum')
+            ->deleteJson("/api/admin/blogs/{$this->blog->slug}")
+            ->assertForbidden();
+    }
+
+    public function test_editor_can_delete_another_users_blog(): void
+    {
+        $editor = User::factory()->editor()->create();
+
+        $this->actingAs($editor, 'sanctum')
+            ->deleteJson("/api/admin/blogs/{$this->blog->slug}")
+            ->assertOk();
+    }
 }

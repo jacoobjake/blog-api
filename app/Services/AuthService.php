@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
 
 class AuthService
@@ -102,5 +103,21 @@ class AuthService
         $this->verifyPassword($currentPassword, $user->password);
 
         $user->update(['password' => $newPassword]);
+    }
+
+    public function sendPasswordResetLink(string $email): string
+    {
+        return Password::sendResetLink(['email' => $email]);
+    }
+
+    public function resetPassword(array $credentials): string
+    {
+        return Password::reset(
+            $credentials,
+            function (User $user, string $password): void {
+                $user->forceFill(['password' => $password])->save();
+                $user->tokens()->delete();
+            },
+        );
     }
 }

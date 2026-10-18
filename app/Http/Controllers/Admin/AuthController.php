@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -43,6 +46,24 @@ class AuthController extends Controller
         $this->authService->invalidateSession();
 
         return $this->success(__('auth.logged_out'));
+    }
+
+    public function forgotPassword(ForgotPasswordRequest $request)
+    {
+        $this->authService->sendPasswordResetLink($request->validated('email'));
+
+        return $this->success(__('passwords.sent'));
+    }
+
+    public function resetPassword(ResetPasswordRequest $request)
+    {
+        $status = $this->authService->resetPassword($request->validated());
+
+        if ($status !== Password::PASSWORD_RESET) {
+            return $this->error(__($status), 422);
+        }
+
+        return $this->success(__($status));
     }
 
 }

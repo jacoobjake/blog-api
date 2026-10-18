@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Role;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -17,21 +17,21 @@ class UserSeeder extends Seeder
         $this->seedSuperAdmin();
     }
 
-    protected function seedSuperAdmin()
+    protected function seedSuperAdmin(): void
     {
-        $superadmin_data = [
-            'name' => 'Super Admin',
-            'email' => 'superadmin@example.com',
-        ];
+        $superadmin = config('seeding.superadmin');
 
-        $existingUser = User::firstWhere('email', $superadmin_data['email']);
+        $existingUser = User::firstWhere('email', $superadmin['email']);
 
-        if (!$existingUser) {
-            User::create([
-                'name' => 'Super Admin',
-                'email' => 'superadmin@example.com',
-                'password' => Hash::make('Password@1234'),
+        if (! $existingUser) {
+            $user = User::create([
+                'name' => $superadmin['name'],
+                'email' => $superadmin['email'],
+                'password' => Hash::make($superadmin['password']),
             ]);
+            $user->assignRole(Role::SUPERADMIN->value);
+        } elseif (! $existingUser->hasRole(Role::SUPERADMIN->value)) {
+            $existingUser->syncRoles(Role::SUPERADMIN->value);
         }
     }
 }

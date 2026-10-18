@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\AssetType;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Image\Enums\Fit;
@@ -26,6 +28,12 @@ class Asset extends Model implements HasMedia
         return [
             'type' => AssetType::class,
         ];
+    }
+
+    #[Scope]
+    public function ownedByAuthenticatedUser(Builder $builder): void
+    {
+        $builder->where('user_id', auth()->id());
     }
 
     public function registerMediaCollections(): void
