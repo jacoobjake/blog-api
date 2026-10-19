@@ -5,16 +5,19 @@ namespace App\Models;
 use App\Enums\Permission;
 use App\Enums\TagType;
 use App\GraphQL\Concerns\ScopesVisibilityToAuthenticatedUser;
+use App\Models\Builders\BlogBuilder;
 use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\Tags\HasTags;
 
+#[UseEloquentBuilder(BlogBuilder::class)]
 class Blog extends Model
 {
     use HasFactory;
