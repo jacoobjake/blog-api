@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Enums\Permission;
 use App\Enums\TagType;
 use App\GraphQL\Concerns\ScopesVisibilityToAuthenticatedUser;
-use App\Models\Builders\BlogBuilder;
+use App\Models\Builders\PaginatedSelectionBuilder;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,7 +17,7 @@ use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\Tags\HasTags;
 
-#[UseEloquentBuilder(BlogBuilder::class)]
+#[UseEloquentBuilder(PaginatedSelectionBuilder::class)]
 class Blog extends Model
 {
     use HasFactory;

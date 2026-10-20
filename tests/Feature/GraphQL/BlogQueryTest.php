@@ -255,7 +255,48 @@ class BlogQueryTest extends TestCase
             ->reject(fn (string $query) => str_contains(strtolower($query), 'count('));
 
         $this->assertNotEmpty($rowSelects);
-        $rowSelects->each(fn (string $query) => $this->assertStringNotContainsString('json_content', $query));
+        $rowSelects->each(function (string $query) {
+            $this->assertStringNotContainsString('json_content', $query);
+            $this->assertStringContainsString('slug', $query);
+            $this->assertStringContainsString('title', $query);
+        });
+    }
+
+    public function test_paginated_blog_list_selects_json_content_when_queried(): void
+    {
+        Blog::factory()->createdBy($this->user)->create([
+            'json_content' => [
+                'type' => 'compressed_base64',
+                'body' => 'list-body',
+            ],
+        ]);
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->graphQL(/** @lang GraphQL */ '
+                query {
+                    blogs(first: 5) {
+                        data {
+                            slug
+                            json_content
+                        }
+                    }
+                }
+            ');
+
+        $response->assertGraphQLErrorFree();
+        $this->assertStringContainsString('list-body', json_encode($response->json('data.blogs.data.0.json_content')));
+
+        $rowSelects = collect(DB::getQueryLog())
+            ->pluck('query')
+            ->filter(fn (string $query) => str_contains(strtolower($query), 'from "blogs"')
+                || str_contains(strtolower($query), 'from `blogs`'))
+            ->reject(fn (string $query) => str_contains(strtolower($query), 'count('));
+
+        $this->assertNotEmpty($rowSelects);
+        $rowSelects->each(fn (string $query) => $this->assertStringContainsString('json_content', $query));
     }
 
     public function test_single_blog_query_still_returns_json_content(): void
