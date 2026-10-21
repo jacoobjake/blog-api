@@ -20,5 +20,6 @@
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_KEY" value="base64:FZ36wlj+67gxtDT7J7L8Fm4jMdz2hnQZ+FJIwU8V08w="/>
+        <env name="LIGHTHOUSE_SCHEMA_CACHE_ENABLE" value="false"/>
     </php>
 </phpunit>

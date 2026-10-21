@@ -5,7 +5,6 @@ namespace App\GraphQL\Builders;
 use App\Enums\AssetType;
 use App\Models\Asset;
 use App\Models\AuthorProfile;
-use App\Models\Blog;
 use App\Services\BlogService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;

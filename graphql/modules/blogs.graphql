@@ -18,6 +18,7 @@ extend type Query {
             defaultCount: 10
             builder: "App\\GraphQL\\Builders\\ScopedListBuilder@blogs"
         )
+        @selectQueriedColumns
 
     "Find a single public blog post by an identifying attribute."
     blogPublic("Search by unique slug." slug: String! @eq): BlogPublic
@@ -35,4 +36,5 @@ extend type Query {
             defaultCount: 10
             builder: "App\\GraphQL\\Resolvers\\BlogResolver@publishedBuilder"
         )
+        @selectQueriedColumns
 }

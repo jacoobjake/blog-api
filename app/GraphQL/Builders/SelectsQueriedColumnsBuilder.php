@@ -1,0 +1,145 @@
+<?php
+
+namespace App\GraphQL\Builders;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Str;
+
+/**
+ * Query-scoped Eloquent builder used by @selectQueriedColumns.
+ *
+ * Lighthouse paginates with `['*']`. This wrapper keeps that default unless
+ * the GraphQL list named specific `data` fields.
+ *
+ * @template TModel of \Illuminate\Database\Eloquent\Model
+ *
+ * @extends Builder<TModel>
+ */
+class SelectsQueriedColumnsBuilder extends Builder
+{
+    /** @var list<string>|null */
+    protected ?array $queriedFields = null;
+
+    public static function wrap(Builder $builder): static
+    {
+        if ($builder instanceof static) {
+            return $builder;
+        }
+
+        $wrapped = new static($builder->getQuery());
+        $wrapped->setModel($builder->getModel());
+        $wrapped->setEagerLoads($builder->getEagerLoads());
+        $wrapped->pendingAttributes = $builder->pendingAttributes;
+        $wrapped->localMacros = $builder->localMacros;
+        $wrapped->onDelete = $builder->onDelete;
+        $wrapped->scopes = $builder->scopes;
+        $wrapped->removedScopes = $builder->removedScopes;
+        $wrapped->afterQueryCallbacks = $builder->afterQueryCallbacks;
+
+        return $wrapped;
+    }
+
+    /**
+     * @param  list<string>  $fields
+     */
+    public function forQueriedFields(array $fields): static
+    {
+        $this->queriedFields = $fields;
+
+        return $this;
+    }
+
+    /**
+     * @param  int|null  $perPage
+     * @param  array<int, string>|string  $columns
+     * @param  string  $pageName
+     * @param  int|null  $page
+     * @param  \Closure|int|null  $total
+     * @return LengthAwarePaginator<int, TModel>
+     */
+    public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null, $total = null)
+    {
+        return parent::paginate($perPage, $this->columnsForPagination($columns), $pageName, $page, $total);
+    }
+
+    /**
+     * @param  int|null  $perPage
+     * @param  array<int, string>|string  $columns
+     * @param  string  $pageName
+     * @param  int|null  $page
+     * @return Paginator<int, TModel>
+     */
+    public function simplePaginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
+    {
+        return parent::simplePaginate($perPage, $this->columnsForPagination($columns), $pageName, $page);
+    }
+
+    /**
+     * @param  array<int, string>|string  $columns
+     * @return array<int, string>|string
+     */
+    protected function columnsForPagination(array|string $columns): array|string
+    {
+        if (! $this->wantsAllColumns($columns) || $this->queriedFields === null || $this->queriedFields === []) {
+            return $columns;
+        }
+
+        return $this->columnsForQueriedFields($this->queriedFields);
+    }
+
+    /**
+     * @param  array<int, string>|string  $columns
+     */
+    protected function wantsAllColumns(array|string $columns): bool
+    {
+        return $columns === ['*'] || $columns === '*';
+    }
+
+    /**
+     * @param  list<string>  $fields
+     * @return list<string>
+     */
+    protected function columnsForQueriedFields(array $fields): array
+    {
+        $columns = [$this->model->getKeyName()];
+
+        foreach ($fields as $field) {
+            if (! is_string($field) || str_starts_with($field, '__')) {
+                continue;
+            }
+
+            $relationName = Str::camel($field);
+
+            if ($this->model->isRelation($relationName)) {
+                $relation = $this->model->{$relationName}();
+
+                if ($relation instanceof BelongsTo || $relation instanceof MorphTo) {
+                    $columns[] = $relation->getForeignKeyName();
+                }
+
+                continue;
+            }
+
+            if ($this->modelHasColumn($field)) {
+                $columns[] = $field;
+            }
+        }
+
+        return array_values(array_unique(array_map(
+            fn (string $column) => $this->model->qualifyColumn($column),
+            $columns,
+        )));
+    }
+
+    protected function modelHasColumn(string $column): bool
+    {
+        $table = $this->model->getTable();
+        $listing = $this->getQuery()->getConnection()->getSchemaBuilder()->getColumnListing($table);
+
+        return in_array($column, $listing, true);
+    }
+}
