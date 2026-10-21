@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\GraphQL\Directives;
 
-use App\GraphQL\Support\PaginatedFieldSelection;
+use App\GraphQL\Builders\SelectsQueriedColumnsBuilder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -14,10 +14,10 @@ use Nuwave\Lighthouse\Support\Contracts\FieldBuilderDirective;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
 /**
- * Pass the selected `data` fields from a @paginate query onto the Eloquent builder.
+ * GraphQL decorator for @paginate fields.
  *
- * Lighthouse always paginates with `['*']`. Models that use
- * PaginatedSelectionBuilder can then select only the matching columns.
+ * Wraps the field's Eloquent builder for this query only and, when the client
+ * names `data` fields, selects the matching columns instead of `*`.
  */
 class SelectQueriedColumnsDirective extends BaseDirective implements FieldBuilderDirective
 {
@@ -25,9 +25,9 @@ class SelectQueriedColumnsDirective extends BaseDirective implements FieldBuilde
     {
         return /** @lang GraphQL */ <<<'GRAPHQL'
 """
-Record the selected `data` fields on a paginated Eloquent builder.
+Select only the columns implied by a paginated list's `data` fields.
 
-Use with `@paginate` and a model whose builder is `PaginatedSelectionBuilder`.
+Use on `@paginate` fields. The model keeps its normal Eloquent builder.
 When the client names specific item fields, those columns are selected.
 When it does not, pagination keeps `SELECT *`.
 """
@@ -41,6 +41,14 @@ GRAPHQL;
             return $builder;
         }
 
-        return PaginatedFieldSelection::apply($builder, $resolveInfo);
+        $builder = SelectsQueriedColumnsBuilder::wrap($builder);
+
+        $data = $resolveInfo->getFieldSelection(1)['data'] ?? null;
+
+        if (! is_array($data)) {
+            return $builder;
+        }
+
+        return $builder->forQueriedFields(array_keys($data));
     }
 }

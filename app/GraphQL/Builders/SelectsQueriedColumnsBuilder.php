@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Builders;
+namespace App\GraphQL\Builders;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,20 +10,38 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Str;
 
 /**
- * Eloquent builder that keeps `SELECT *` as the paginate default.
+ * Query-scoped Eloquent builder used by @selectQueriedColumns.
  *
- * When a GraphQL list query names specific `data` fields, Lighthouse still
- * calls `paginate($perPage, ['*'])`. `forQueriedFields()` records those fields
- * so this builder can replace `*` with the matching table columns.
+ * Lighthouse paginates with `['*']`. This wrapper keeps that default unless
+ * the GraphQL list named specific `data` fields.
  *
  * @template TModel of \Illuminate\Database\Eloquent\Model
  *
  * @extends Builder<TModel>
  */
-class PaginatedSelectionBuilder extends Builder
+class SelectsQueriedColumnsBuilder extends Builder
 {
     /** @var list<string>|null */
     protected ?array $queriedFields = null;
+
+    public static function wrap(Builder $builder): static
+    {
+        if ($builder instanceof static) {
+            return $builder;
+        }
+
+        $wrapped = new static($builder->getQuery());
+        $wrapped->setModel($builder->getModel());
+        $wrapped->setEagerLoads($builder->getEagerLoads());
+        $wrapped->pendingAttributes = $builder->pendingAttributes;
+        $wrapped->localMacros = $builder->localMacros;
+        $wrapped->onDelete = $builder->onDelete;
+        $wrapped->scopes = $builder->scopes;
+        $wrapped->removedScopes = $builder->removedScopes;
+        $wrapped->afterQueryCallbacks = $builder->afterQueryCallbacks;
+
+        return $wrapped;
+    }
 
     /**
      * @param  list<string>  $fields

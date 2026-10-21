@@ -3,26 +3,20 @@
 namespace App\GraphQL\Builders;
 
 use App\Enums\AssetType;
-use App\GraphQL\Support\PaginatedFieldSelection;
 use App\Models\Asset;
 use App\Models\AuthorProfile;
 use App\Services\BlogService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Nuwave\Lighthouse\Execution\ResolveInfo;
-use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
 /**
  * Reusable @paginate builders that apply policy-based query scoping.
  */
 class ScopedListBuilder
 {
-    public function blogs(mixed $_, array $args, GraphQLContext $context, ResolveInfo $resolveInfo): Builder
+    public function blogs(mixed $_, array $args): Builder
     {
-        return PaginatedFieldSelection::apply(
-            app(BlogService::class)->getQuery()->visibleToAuthenticatedUser(),
-            $resolveInfo,
-        );
+        return app(BlogService::class)->getQuery()->visibleToAuthenticatedUser();
     }
 
     public function authorProfiles(mixed $_, array $args): Builder
