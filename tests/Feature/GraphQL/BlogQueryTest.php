@@ -4,6 +4,7 @@ namespace Tests\Feature\GraphQL;
 
 use App\Models\Blog;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Nuwave\Lighthouse\Testing\MakesGraphQLRequests;
 use Tests\TestCase;
 
@@ -197,8 +198,126 @@ class BlogQueryTest extends TestCase
         $published = collect($response->json('data.blogsPublic.data'));
 
         // All returned blogs must have is_published = true
-        $published->each(fn($blog) => $this->assertTrue($blog['is_published']));
+        $published->each(fn ($blog) => $this->assertTrue($blog['is_published']));
         $this->assertContains('Published', $published->pluck('title')->toArray());
         $this->assertNotContains('Draft', $published->pluck('title')->toArray());
+    }
+
+    public function test_dashboard_counts_use_count_queries_only(): void
+    {
+        Blog::factory()->count(2)->createdBy($this->user)->published()->create();
+        Blog::factory()->createdBy($this->user)->unpublished()->create();
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $this->actingAs($this->user, 'sanctum')
+            ->graphQL(/** @lang GraphQL */ '
+                query {
+                    total: blogs(first: 0) { paginatorInfo { total } }
+                    published: blogs(first: 0, is_published: true) { paginatorInfo { total } }
+                    drafts: blogs(first: 0, is_published: false) { paginatorInfo { total } }
+                }
+            ')
+            ->assertJsonPath('data.total.paginatorInfo.total', 3)
+            ->assertJsonPath('data.published.paginatorInfo.total', 2)
+            ->assertJsonPath('data.drafts.paginatorInfo.total', 1);
+
+        $queries = collect(DB::getQueryLog())->pluck('query');
+
+        $this->assertTrue($queries->contains(
+            fn (string $query) => str_contains(strtolower($query), 'count('),
+        ));
+        $this->assertFalse($queries->contains(
+            fn (string $query) => str_contains($query, 'json_content'),
+        ));
+    }
+
+    public function test_paginated_blog_list_does_not_select_json_content(): void
+    {
+        Blog::factory()->createdBy($this->user)->create();
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $this->actingAs($this->user, 'sanctum')
+            ->graphQL(/** @lang GraphQL */ '
+                query {
+                    blogs(first: 5) { data { slug title } }
+                }
+            ')
+            ->assertJsonMissingPath('errors');
+
+        $rowSelects = collect(DB::getQueryLog())
+            ->pluck('query')
+            ->filter(fn (string $query) => str_contains(strtolower($query), 'from "blogs"')
+                || str_contains(strtolower($query), 'from `blogs`'))
+            ->reject(fn (string $query) => str_contains(strtolower($query), 'count('));
+
+        $this->assertNotEmpty($rowSelects);
+        $rowSelects->each(function (string $query) {
+            $this->assertStringNotContainsString('json_content', $query);
+            $this->assertStringContainsString('slug', $query);
+            $this->assertStringContainsString('title', $query);
+        });
+    }
+
+    public function test_paginated_blog_list_selects_json_content_when_queried(): void
+    {
+        Blog::factory()->createdBy($this->user)->create([
+            'json_content' => [
+                'type' => 'compressed_base64',
+                'body' => 'list-body',
+            ],
+        ]);
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->graphQL(/** @lang GraphQL */ '
+                query {
+                    blogs(first: 5) {
+                        data {
+                            slug
+                            json_content
+                        }
+                    }
+                }
+            ');
+
+        $response->assertGraphQLErrorFree();
+        $this->assertStringContainsString('list-body', json_encode($response->json('data.blogs.data.0.json_content')));
+
+        $rowSelects = collect(DB::getQueryLog())
+            ->pluck('query')
+            ->filter(fn (string $query) => str_contains(strtolower($query), 'from "blogs"')
+                || str_contains(strtolower($query), 'from `blogs`'))
+            ->reject(fn (string $query) => str_contains(strtolower($query), 'count('));
+
+        $this->assertNotEmpty($rowSelects);
+        $rowSelects->each(fn (string $query) => $this->assertStringContainsString('json_content', $query));
+    }
+
+    public function test_single_blog_query_still_returns_json_content(): void
+    {
+        $blog = Blog::factory()->createdBy($this->user)->create([
+            'json_content' => [
+                'type' => 'compressed_base64',
+                'body' => 'stored-body',
+            ],
+        ]);
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->graphQL(/** @lang GraphQL */ '
+                query ($slug: String!) {
+                    blog(slug: $slug) {
+                        json_content
+                    }
+                }
+            ', ['slug' => $blog->slug]);
+
+        $response->assertGraphQLErrorFree();
+        $this->assertStringContainsString('stored-body', json_encode($response->json('data.blog.json_content')));
     }
 }
